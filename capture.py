@@ -8,8 +8,6 @@ codigoMaquina = ""
 
 def capturar(usuarioCaptura, horarioCaptura, cpuUso, memUso, diskUso):
     df = None
-    if(os.path.isfile("relatorioMonitoramento.csv")):
-        df = pd.read_csv("relatorioMonitoramento.csv", sep=";")
    
     dados = {
         "usuario":[],
@@ -27,11 +25,7 @@ def capturar(usuarioCaptura, horarioCaptura, cpuUso, memUso, diskUso):
     uptime_seconds = (datetime.now() - datetime.fromtimestamp(ps.boot_time())).total_seconds()
     dados["uptime"].append(uptime_seconds)
 
-    if df is not None: 
-        new_df = pd.DataFrame(dados)
-        df = pd.concat([df, new_df], ignore_index=True)
-    else:
-        df = pd.DataFrame(dados)
+    df = pd.DataFrame(dados)
 
     if(os.path.exists('capturaMaquina.csv')):
         return df.to_csv("capturaMaquina.csv", mode="a", encoding="utf-8", index=False, sep=";", header=False)
