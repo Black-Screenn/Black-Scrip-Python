@@ -8,6 +8,10 @@ codigoMaquina = ""
 
 def capturar(usuarioCaptura, horarioCaptura, cpuUso, memUso, diskUso):
     df = None
+    net = ps.net_io_counters()
+    pacotes_enviados = net.packets_sent
+    pacotes_recebidos = net.packets_recv
+    pacotes_perdidos = net.dropin + net.dropout
    
     dados = {
         "usuario":[],
@@ -15,7 +19,10 @@ def capturar(usuarioCaptura, horarioCaptura, cpuUso, memUso, diskUso):
         "cpu":[],
         "ram":[],
         "disco":[],
-        "uptime": []
+        "uptime": [],
+        "pacotes_enviados": [],
+        "pacotes_recebidos": [],
+        "pacotes_perdidos": []
     }       
     dados["usuario"].append(usuarioCaptura)
     dados["timestamp"].append(horarioCaptura)
@@ -24,6 +31,9 @@ def capturar(usuarioCaptura, horarioCaptura, cpuUso, memUso, diskUso):
     dados["disco"].append(diskUso)
     uptime_seconds = (datetime.now() - datetime.fromtimestamp(ps.boot_time())).total_seconds()
     dados["uptime"].append(uptime_seconds)
+    dados["pacotes_enviados"].append(pacotes_enviados)
+    dados["pacotes_recebidos"].append(pacotes_recebidos)
+    dados["pacotes_perdidos"].append(pacotes_perdidos)
 
     df = pd.DataFrame(dados)
 
@@ -33,7 +43,7 @@ def capturar(usuarioCaptura, horarioCaptura, cpuUso, memUso, diskUso):
         return df.to_csv("capturaMaquina.csv", mode="a", encoding="utf-8", index=False, sep=";")
 
 def capturarProcessos():
-    dataAtual = datetime.now();
+    dataAtual = datetime.now()
 
     listaProcesso = {"datetime": [], "pid": [], "codigo": [], "name": [], "status": []}
     
