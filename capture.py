@@ -3,8 +3,13 @@ import psutil as ps
 import pandas as pd # type: ignore
 from datetime import datetime
 import os
+import geopy as geo
 
 codigoMaquina = ""
+
+def cadastrar():
+    a
+
 
 def capturar(usuarioCaptura, horarioCaptura, cpuUso, memUso, diskUso):
     df = None

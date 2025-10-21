@@ -1,0 +1,7 @@
+geopy
+psutil
+pandas
+os
+time
+datetime
+requests
