@@ -3,15 +3,23 @@ import psutil as ps
 import pandas as pd # type: ignore
 from datetime import datetime
 import os
-import geopy as geo
 
-codigoMaquina = ""
+interfaces = ps.net_if_stats()
+Mac_address = None
 
-def cadastrar():
-    a
+for interface_name, interface_info in interfaces.items():
+    if interface_info.isup:
+        addrs = ps.net_if_addrs().get(interface_name, [])
+        for addr in addrs:
+            if addr.family == ps.AF_LINK:
+                Mac_address = addr.address
+                break
+        if Mac_address:
+            break
 
+codigoMaquina = Mac_address
 
-def capturar(usuarioCaptura, horarioCaptura, cpuUso, memUso, diskUso):
+def capturar(horarioCaptura, cpuUso, memUso, diskUso):
     df = None
     net = ps.net_io_counters()
     pacotes_enviados = net.packets_sent
@@ -19,8 +27,8 @@ def capturar(usuarioCaptura, horarioCaptura, cpuUso, memUso, diskUso):
     pacotes_perdidos = net.dropin + net.dropout
    
     dados = {
-        "usuario":[],
-        "timestamp":[],
+        "macaddress":[],
+        "datetime":[],
         "cpu":[],
         "ram":[],
         "disco":[],
@@ -29,8 +37,8 @@ def capturar(usuarioCaptura, horarioCaptura, cpuUso, memUso, diskUso):
         "pacotes_recebidos": [],
         "pacotes_perdidos": []
     }       
-    dados["usuario"].append(usuarioCaptura)
-    dados["timestamp"].append(horarioCaptura)
+    dados["macaddress"].append(codigoMaquina)
+    dados["datetime"].append(horarioCaptura)
     dados["cpu"].append(cpuUso)
     dados["ram"].append(memUso)
     dados["disco"].append(diskUso)
@@ -41,36 +49,57 @@ def capturar(usuarioCaptura, horarioCaptura, cpuUso, memUso, diskUso):
     dados["pacotes_perdidos"].append(pacotes_perdidos)
 
     df = pd.DataFrame(dados)
-
-    if(os.path.exists('capturaMaquina.csv')):
-        return df.to_csv("capturaMaquina.csv", mode="a", encoding="utf-8", index=False, sep=";", header=False)
+    file_name = f"capturaMaquina-{codigoMaquina}.csv"
+    if(os.path.exists(file_name)):
+        df.to_csv(file_name, mode="a", encoding="utf-8", index=False, sep=";", header=False)
     else:
-        return df.to_csv("capturaMaquina.csv", mode="a", encoding="utf-8", index=False, sep=";")
+        df.to_csv(file_name, mode="a", encoding="utf-8", index=False, sep=";")
+    enviarS3(file_name)
 
 def capturarProcessos():
     dataAtual = datetime.now()
 
-    listaProcesso = {"datetime": [], "pid": [], "codigo": [], "name": [], "status": []}
+    listaProcesso = {"datetime": [], "pid": [], "macaddress": [], "name": [], "status": []}
     
     for processo in ps.process_iter(['pid', 'name', 'status']):
         
         listaProcesso["datetime"].append(dataAtual)
-        listaProcesso["codigo"].append(codigoMaquina)
+        listaProcesso["macaddress"].append(codigoMaquina)
         listaProcesso["pid"].append(processo.pid)
         listaProcesso["name"].append(processo.info["name"])
         listaProcesso["status"].append(processo.info["status"])
         
     dfProcesso = pd.DataFrame(listaProcesso)
-    if(os.path.exists('capturaProcesso.csv')):
-        dfProcesso.to_csv("capturaProcesso.csv", mode="a", encoding="utf-8", index=False, sep=";", header=False)
+    file_name = f"capturaProcesso-{codigoMaquina}.csv"
+    if(os.path.exists(file_name)):
+        dfProcesso.to_csv(file_name, mode="a", encoding="utf-8", index=False, sep=";", header=False)
     else:
-        dfProcesso.to_csv("capturaProcesso.csv", mode="a", encoding="utf-8", index=False, sep=";")
+        dfProcesso.to_csv(file_name, mode="a", encoding="utf-8", index=False, sep=";")
+    enviarS3(file_name)
+
+def enviarS3(file_name):
+    import logging
+    import boto3
+    from botocore.exceptions import ClientError
+    import os
+
+    bucket = "s3-raw-04251057"
+    object_name = os.path.basename(file_name) 
+
+    s3_client = boto3.client('s3')
+
+    try:
+        s3_client.upload_file(file_name, bucket, object_name)
+    except ClientError as e:
+        logging.error(e)
+        print(e)
 
 while True:
-    capturar(codigoMaquina, 
+    capturar(
              datetime.now(), 
              ps.cpu_percent(), ps.virtual_memory().percent, 
              ps.disk_usage('/').percent
     )
     capturarProcessos()
-    time.sleep(10)
+    time.sleep(60)
+
