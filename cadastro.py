@@ -39,30 +39,36 @@ def cadastrar():
         "longitude":[location.json().get('lon')],
     }
 
-    df = pd.DataFrame(dados)
+    df = {
+        "dataframe": [
+            dados
+        ]
+    }
+    res = requests.post(f"http://localhost:3333/cloud/enviar/cadastroMaquina-{Mac_address}", json=df)
 
-    import logging
-    import boto3
-    from botocore.exceptions import ClientError
-    import os
+    print(res)
+    # import logging
+    # import boto3
+    # from botocore.exceptions import ClientError
+    # import os
 
-    file_name = f"cadastro-{Mac_address}.csv"
+    # file_name = f"cadastroMaquina-{Mac_address}.csv"
 
-    if(os.path.exists(file_name)):
-        df.to_csv(file_name, mode="a", encoding="utf-8", index=False, sep=";", header=False)
-    else:
-        df.to_csv(file_name, mode="a", encoding="utf-8", index=False, sep=";")
+    # if(os.path.exists(file_name)):
+    #     df.to_csv(file_name, mode="a", encoding="utf-8", index=False, sep=";", header=False)
+    # else:
+    #     df.to_csv(file_name, mode="a", encoding="utf-8", index=False, sep=";")
 
-    bucket = "s3-raw-04251057"
-    object_name = os.path.basename(file_name) 
+    # bucket = "s3-raw-04251057"
+    # object_name = os.path.basename(file_name) 
 
-    s3_client = boto3.client('s3')
+    # s3_client = boto3.client('s3')
 
-    try:
-        s3_client.upload_file(file_name, bucket, object_name)
-    except ClientError as e:
-        logging.error(e)
-        print(e)
+    # try:
+    #     s3_client.upload_file(file_name, bucket, object_name)
+    # except ClientError as e:
+    #     logging.error(e)
+    #     print(e)
 
     
 cadastrar()
