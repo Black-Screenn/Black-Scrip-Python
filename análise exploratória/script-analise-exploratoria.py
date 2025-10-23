@@ -52,17 +52,25 @@ def capturar(horarioCaptura, maquinaID, cpuUso, memUso, diskUso, uptime, bytes_e
 
 
 def capturarProcessos(maquinaID, dataAtual):
-    if maquinaID != 'machine_1':
-        return 
 
     listaProcesso = {"codigo_maquina": [], "datetime": [], "pid": [], "name": [], "status": []} # Removida a chave "codigo"
-    
-    for processo in ps.process_iter(['pid', 'name', 'status']):
-        listaProcesso["codigo_maquina"].append(maquinaID) 
-        listaProcesso["datetime"].append(dataAtual)
-        listaProcesso["pid"].append(processo.pid)
-        listaProcesso["name"].append(processo.info["name"])
-        listaProcesso["status"].append(processo.info["status"])
+    if(maquinaID == "machine_1"):
+        for processo in ps.process_iter(['pid', 'name', 'status']):
+            listaProcesso["codigo_maquina"].append(maquinaID) 
+            listaProcesso["datetime"].append(dataAtual)
+            listaProcesso["pid"].append(processo.pid)
+            listaProcesso["name"].append(processo.info["name"])
+            listaProcesso["status"].append(processo.info["status"])
+    else:
+        qtd_processos = random.randint(30, 80)
+        qtd_running = random.randint(1, 10)
+        for pid in range(1, qtd_processos + 1):
+            listaProcesso["codigo_maquina"].append(maquinaID)
+            listaProcesso["datetime"].append(dataAtual)
+            listaProcesso["pid"].append(pid)
+            listaProcesso["name"].append(f"process_{pid}")
+            listaProcesso["status"].append("running" if pid <= qtd_running else random.choice(["sleeping", "stopped", "idle", "zombie"]))
+
         
     dfProcesso = pd.DataFrame(listaProcesso)
 
@@ -92,6 +100,7 @@ while True:
             capturarProcessos(codigo_maquina, horario_captura)
         else:
             (cpu_uso, mem_uso, disk_uso, uptime_seconds, bytes_enviados, bytes_recebidos, pacotes_perdidos) = gerar_metricas_simuladas(codigo_maquina)
+            capturarProcessos(codigo_maquina, horario_captura)
             
         capturar(
             horario_captura, codigo_maquina, cpu_uso, mem_uso, disk_uso, 
