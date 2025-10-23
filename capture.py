@@ -3,6 +3,7 @@ import psutil as ps
 import pandas as pd # type: ignore
 from datetime import datetime
 import os
+import requests
 
 interfaces = ps.net_if_stats()
 Mac_address = None
@@ -54,6 +55,8 @@ def capturar(horarioCaptura, cpuUso, memUso, diskUso):
         df.to_csv(file_name, mode="a", encoding="utf-8", index=False, sep=";", header=False)
     else:
         df.to_csv(file_name, mode="a", encoding="utf-8", index=False, sep=";")
+
+    print(df)
     enviarS3(file_name)
 
 def capturarProcessos():
@@ -78,21 +81,16 @@ def capturarProcessos():
     enviarS3(file_name)
 
 def enviarS3(file_name):
-    import logging
-    import boto3
-    from botocore.exceptions import ClientError
-    import os
 
-    bucket = "s3-raw-04251057"
-    object_name = os.path.basename(file_name) 
+    df = pd.read_csv(file_name, sep=";")
 
-    s3_client = boto3.client('s3')
-
-    try:
-        s3_client.upload_file(file_name, bucket, object_name)
-    except ClientError as e:
-        logging.error(e)
-        print(e)
+    data = {
+        "dataframe": [
+            df.to_json(orient="records")
+        ]
+    }
+    
+    res = requests.post(f"http://localhost:3333/cloud/enviar/{file_name}", json=data)
 
 while True:
     capturar(
