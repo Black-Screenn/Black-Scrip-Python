@@ -24,8 +24,8 @@ codigoMaquina = Mac_address
 def capturar(horarioCaptura, cpuUso, memUso, diskUso):
     df = None
     net = ps.net_io_counters()
-    pacotes_enviados = net.packets_sent
-    pacotes_recebidos = net.packets_recv
+    bytes_enviados = net.bytes_sent / (1024 ** 2)
+    bytes_recebidos = net.bytes_recv / (1024 ** 2)
     pacotes_perdidos = net.dropin + net.dropout
    
     dados = {
@@ -35,8 +35,8 @@ def capturar(horarioCaptura, cpuUso, memUso, diskUso):
         "ram":[],
         "disco":[],
         "uptime": [],
-        "pacotes_enviados": [],
-        "pacotes_recebidos": [],
+        "bytes_enviados": [],
+        "bytes_recebidos": [],
         "pacotes_perdidos": []
     }       
     dados["macaddress"].append(codigoMaquina)
@@ -46,8 +46,8 @@ def capturar(horarioCaptura, cpuUso, memUso, diskUso):
     dados["disco"].append(diskUso)
     uptime_seconds = (datetime.now() - datetime.fromtimestamp(ps.boot_time())).total_seconds()
     dados["uptime"].append(uptime_seconds)
-    dados["pacotes_enviados"].append(pacotes_enviados)
-    dados["pacotes_recebidos"].append(pacotes_recebidos)
+    dados["bytes_enviados"].append(bytes_enviados)
+    dados["bytes_recebidos"].append(bytes_recebidos)
     dados["pacotes_perdidos"].append(pacotes_perdidos)
 
     df = pd.DataFrame(dados)
