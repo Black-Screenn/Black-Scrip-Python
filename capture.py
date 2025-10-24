@@ -2,6 +2,7 @@ import time
 import psutil as ps
 import pandas as pd # type: ignore
 from datetime import datetime
+from calendar import monthrange
 import os
 import requests
 
@@ -50,18 +51,18 @@ def capturar(horarioCaptura, cpuUso, memUso, diskUso):
     dados["pacotes_perdidos"].append(pacotes_perdidos)
 
     df = pd.DataFrame(dados)
-    file_name = f"capturaMaquina-{codigoMaquina}.csv"
+    file_name = f"capturaMaquina-{horarioCaptura.month}-{horarioCaptura.year}-{codigoMaquina}.csv"
     if(os.path.exists(file_name)):
         df.to_csv(file_name, mode="a", encoding="utf-8", index=False, sep=";", header=False)
     else:
         df.to_csv(file_name, mode="a", encoding="utf-8", index=False, sep=";")
+        if os.path.exists(f"capturaMaquina-{horarioCaptura.month-1 if horarioCaptura.month-1 != 0 else 12}-{horarioCaptura.year if horarioCaptura.month-1 != 0 else horarioCaptura.year-1}-{codigoMaquina}.csv"):
+            os.remove(f"capturaMaquina-{horarioCaptura.month-1 if horarioCaptura.month-1 != 0 else 12}-{horarioCaptura.year if horarioCaptura.month-1 != 0 else horarioCaptura.year-1}-{codigoMaquina}.csv")
 
     print(df)
     enviarS3(file_name)
 
-def capturarProcessos():
-    dataAtual = datetime.now()
-
+def capturarProcessos(dataAtual):
     listaProcesso = {"datetime": [], "pid": [], "macaddress": [], "name": [], "status": []}
     
     for processo in ps.process_iter(['pid', 'name', 'status']):
@@ -73,11 +74,13 @@ def capturarProcessos():
         listaProcesso["status"].append(processo.info["status"])
         
     dfProcesso = pd.DataFrame(listaProcesso)
-    file_name = f"capturaProcesso-{codigoMaquina}.csv"
+    file_name = f"capturaProcesso-{dataAtual.month}-{dataAtual.year}-{codigoMaquina}.csv"
     if(os.path.exists(file_name)):
         dfProcesso.to_csv(file_name, mode="a", encoding="utf-8", index=False, sep=";", header=False)
     else:
         dfProcesso.to_csv(file_name, mode="a", encoding="utf-8", index=False, sep=";")
+        if os.path.exists(f"capturaProcesso-{dataAtual.month-1 if dataAtual.month-1 != 0 else 12}-{dataAtual.year if dataAtual.month-1 != 0 else dataAtual.year-1}-{codigoMaquina}.csv"):
+            os.remove(f"capturaProcesso-{dataAtual.month-1 if dataAtual.month-1 != 0 else 12}-{dataAtual.year if dataAtual.month-1 != 0 else dataAtual.year-1}-{codigoMaquina}.csv")
     enviarS3(file_name)
 
 def enviarS3(file_name):
@@ -89,15 +92,18 @@ def enviarS3(file_name):
             df.to_json(orient="records")
         ]
     }
-    
+
     res = requests.post(f"http://localhost:3333/cloud/enviar/{file_name}", json=data)
 
+
 while True:
+    datacaptura = datetime.now()
     capturar(
-             datetime.now(), 
+             datacaptura, 
              ps.cpu_percent(), ps.virtual_memory().percent, 
              ps.disk_usage('/').percent
     )
-    capturarProcessos()
+    capturarProcessos(datacaptura)
     time.sleep(60)
+
 

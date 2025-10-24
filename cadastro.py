@@ -44,7 +44,7 @@ def cadastrar():
             dados
         ]
     }
-    res = requests.post(f"http://localhost:3333/cloud/enviar/cadastroMaquina-{Mac_address}", json=df)
+    res = requests.post(f"http://localhost:3333/caixas/cadastrar", json=df)
 
     print(res)
     # import logging
