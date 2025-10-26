@@ -2,3 +2,4 @@ geopy
 psutil
 pandas
 requests
+python-dotenv

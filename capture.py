@@ -5,6 +5,9 @@ from datetime import datetime
 from calendar import monthrange
 import os
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 interfaces = ps.net_if_stats()
 Mac_address = None
@@ -93,7 +96,8 @@ def enviarS3(file_name):
         ]
     }
 
-    res = requests.post(f"http://localhost:3333/cloud/enviar/{file_name}", json=data)
+    Ip = os.getenv('IpAplicacao', 'http://localhost:3333')
+    res = requests.post(f"{Ip}/cloud/enviar/{file_name}", json=data)
 
 
 while True:

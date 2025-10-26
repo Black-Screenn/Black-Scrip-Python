@@ -5,6 +5,10 @@ from datetime import datetime
 import os
 import requests
 from geopy.geocoders import Nominatim
+from dotenv import load_dotenv
+
+# Carregar variáveis de ambiente
+load_dotenv()
 
 def cadastrar():
     interfaces = ps.net_if_stats()
@@ -44,7 +48,9 @@ def cadastrar():
             dados
         ]
     }
-    res = requests.post(f"http://localhost:3333/caixas/cadastrar", json=df)
+
+    Ip = os.getenv('IpAplicacao', 'http://localhost:3333')
+    res = requests.post(f"{Ip}/caixas/cadastrar", json=df)
 
     print(res)
     # import logging
