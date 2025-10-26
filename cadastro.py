@@ -50,7 +50,7 @@ def cadastrar():
     }
 
     Ip = os.getenv('IpAplicacao', 'http://localhost:3333')
-    res = requests.post(f"{Ip}/caixas/cadastrar", json=df)
+    res = requests.post(f"http://{Ip}/caixas/cadastrar", json=df)
 
     print(res)
     # import logging

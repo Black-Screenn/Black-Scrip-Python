@@ -97,7 +97,7 @@ def enviarS3(file_name):
     }
 
     Ip = os.getenv('IpAplicacao', 'http://localhost:3333')
-    res = requests.post(f"{Ip}/cloud/enviar/{file_name}", json=data)
+    res = requests.post(f"http://{Ip}/cloud/enviar/{file_name}", json=data)
 
 
 while True:
