@@ -7,7 +7,6 @@ import requests
 from geopy.geocoders import Nominatim
 from dotenv import load_dotenv
 
-# Carregar variáveis de ambiente
 load_dotenv()
 
 def cadastrar():
@@ -53,30 +52,7 @@ def cadastrar():
     res = requests.post(f"{Ip}/caixas/cadastrar", json=df)
 
     print(res)
-    # import logging
-    # import boto3
-    # from botocore.exceptions import ClientError
-    # import os
 
-    # file_name = f"cadastroMaquina-{Mac_address}.csv"
-
-    # if(os.path.exists(file_name)):
-    #     df.to_csv(file_name, mode="a", encoding="utf-8", index=False, sep=";", header=False)
-    # else:
-    #     df.to_csv(file_name, mode="a", encoding="utf-8", index=False, sep=";")
-
-    # bucket = "s3-raw-04251057"
-    # object_name = os.path.basename(file_name) 
-
-    # s3_client = boto3.client('s3')
-
-    # try:
-    #     s3_client.upload_file(file_name, bucket, object_name)
-    # except ClientError as e:
-    #     logging.error(e)
-    #     print(e)
-
-    
 cadastrar()
 
     
