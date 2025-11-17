@@ -1,11 +1,19 @@
 import time
 import psutil as ps
-import pandas as pd # type: ignore
+import pandas as pd 
 from datetime import datetime
 from calendar import monthrange
 import os
 import requests
 from dotenv import load_dotenv
+
+# from uuid import getnode as get_mac
+
+# mac = get_mac()
+
+print(mac)
+
+
 
 load_dotenv()
 
