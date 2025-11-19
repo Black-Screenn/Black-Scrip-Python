@@ -1,6 +1,7 @@
 import os
 import time
 from datetime import datetime
+from uuid import getnode as get_macaddress
 
 import pandas as pd
 import psutil as ps
@@ -8,22 +9,6 @@ import requests
 from dotenv import load_dotenv
 
 load_dotenv()
-
-
-def get_macaddress():
-    interfaces = ps.net_if_stats()
-    mac_address = None
-
-    for interface_name, interface_info in interfaces.items():
-        if interface_info.isup:
-            addrs = ps.net_if_addrs().get(interface_name, [])
-            for addr in addrs:
-                if addr.family == ps.AF_LINK and addr.address != "00:00:00:00:00:00":
-                    mac_address = addr.address
-                    break
-            if mac_address:
-                break
-    return mac_address
 
 
 codigoMaquina = get_macaddress()
