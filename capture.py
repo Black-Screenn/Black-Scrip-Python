@@ -86,7 +86,7 @@ def capturar(horarioCaptura, cpuUso, memUso, diskUso):
         if os.path.exists(prev_file):
             os.remove(prev_file)
     print(df)
-   # enviarS3(file_name)
+    enviarS3(file_name)
 
 def capturarProcessos(dataAtual):
     listaProcesso = {
@@ -118,20 +118,20 @@ def capturarProcessos(dataAtual):
         dfProcesso.to_csv(file_name, mode="a", encoding="utf-8", index=False, sep=";")
         if os.path.exists(f"capturaProcesso-{dataAtual.month-1 if dataAtual.month-1 != 0 else 12}-{dataAtual.year if dataAtual.month-1 != 0 else dataAtual.year-1}-{codigoMaquina}.csv"):
             os.remove(f"capturaProcesso-{dataAtual.month-1 if dataAtual.month-1 != 0 else 12}-{dataAtual.year if dataAtual.month-1 != 0 else dataAtual.year-1}-{codigoMaquina}.csv")
-   # enviarS3(file_name)
+    enviarS3(file_name)
 
-# def enviarS3(file_name):
+    def enviarS3(file_name):
 
-  #  df = pd.read_csv(file_name, sep=";")
+     df = pd.read_csv(file_name, sep=";")
 
-   # data = {
-    #    "dataframe": [
-     #       df.to_json(orient="records")
-      #  ]
-   # }
+    data = {
+        "dataframe": [
+            df.to_json(orient="records")
+        ]
+    }
 
-   # Ip = os.getenv('IpAplicacao', 'http://localhost:3333')
-   # res = requests.post(f"http://{Ip}/cloud/enviar/{file_name}", json=data)
+    Ip = os.getenv('IpAplicacao', 'http://localhost:3333')
+    res = requests.post(f"http://{Ip}/cloud/enviar/{file_name}", json=data)
 
 
 while True:
