@@ -7,18 +7,18 @@ import os
 import requests
 from dotenv import load_dotenv
 
-# from uuid import getnode as get_mac
+from uuid import getnode as get_mac
 
-# mac = get_mac()
+mac = get_mac()
 
-print(mac)
+
 
 
 
 load_dotenv()
 
 interfaces = ps.net_if_stats()
-Mac_address = None
+Mac_address = ""
 
 for interface_name, interface_info in interfaces.items():
     if interface_info.isup:
@@ -30,7 +30,7 @@ for interface_name, interface_info in interfaces.items():
         if Mac_address:
             break
 
-codigoMaquina = Mac_address
+codigoMaquina = get_mac()
 
 def capturar(horarioCaptura, cpuUso, memUso, diskUso):
     df = None
@@ -71,7 +71,7 @@ def capturar(horarioCaptura, cpuUso, memUso, diskUso):
             os.remove(f"capturaMaquina-{horarioCaptura.month-1 if horarioCaptura.month-1 != 0 else 12}-{horarioCaptura.year if horarioCaptura.month-1 != 0 else horarioCaptura.year-1}-{codigoMaquina}.csv")
 
     print(df)
-    enviarS3(file_name)
+   # enviarS3(file_name)
 
 def capturarProcessos(dataAtual):
     listaProcesso = {"datetime": [], "pid": [], "macaddress": [], "name": [], "status": []}
@@ -92,20 +92,20 @@ def capturarProcessos(dataAtual):
         dfProcesso.to_csv(file_name, mode="a", encoding="utf-8", index=False, sep=";")
         if os.path.exists(f"capturaProcesso-{dataAtual.month-1 if dataAtual.month-1 != 0 else 12}-{dataAtual.year if dataAtual.month-1 != 0 else dataAtual.year-1}-{codigoMaquina}.csv"):
             os.remove(f"capturaProcesso-{dataAtual.month-1 if dataAtual.month-1 != 0 else 12}-{dataAtual.year if dataAtual.month-1 != 0 else dataAtual.year-1}-{codigoMaquina}.csv")
-    enviarS3(file_name)
+   # enviarS3(file_name)
 
-def enviarS3(file_name):
+# def enviarS3(file_name):
 
-    df = pd.read_csv(file_name, sep=";")
+  #  df = pd.read_csv(file_name, sep=";")
 
-    data = {
-        "dataframe": [
-            df.to_json(orient="records")
-        ]
-    }
+   # data = {
+    #    "dataframe": [
+     #       df.to_json(orient="records")
+      #  ]
+   # }
 
-    Ip = os.getenv('IpAplicacao', 'http://localhost:3333')
-    res = requests.post(f"http://{Ip}/cloud/enviar/{file_name}", json=data)
+   # Ip = os.getenv('IpAplicacao', 'http://localhost:3333')
+   # res = requests.post(f"http://{Ip}/cloud/enviar/{file_name}", json=data)
 
 
 while True:

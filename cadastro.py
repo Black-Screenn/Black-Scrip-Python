@@ -7,22 +7,19 @@ import requests
 from geopy.geocoders import Nominatim
 from dotenv import load_dotenv
 
+from uuid import getnode as get_mac
+
+mac = get_mac()
+
+
 load_dotenv()
 
 def cadastrar():
     interfaces = ps.net_if_stats()
-    Mac_address = None
+    Mac_address = get_mac()
     idEmpresa = input("Digite o ID da Empresa: ")
 
-    for interface_name, interface_info in interfaces.items():
-        if interface_info.isup:
-            addrs = ps.net_if_addrs().get(interface_name, [])
-            for addr in addrs:
-                if addr.family == ps.AF_LINK:
-                    Mac_address = addr.address
-                    break
-            if Mac_address:
-                break
+    
 
     ipv6 = requests.get('https://api64.ipify.org/?format=json')
     location = requests.get(f'http://ip-api.com/json/{ipv6.json().get("ip")}')

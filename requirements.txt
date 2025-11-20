@@ -3,3 +3,4 @@ psutil
 pandas
 requests
 python-dotenv
+getnode
