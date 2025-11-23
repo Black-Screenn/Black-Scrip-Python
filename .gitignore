@@ -1,3 +1,2 @@
-capturaMaquina.csv
-capturaProcesso.csv
+*.csv
 venv
