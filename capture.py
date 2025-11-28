@@ -91,18 +91,33 @@ def capturarProcessos(dataAtual):
         "datetime": [],
         "pid": [],
         "macaddress": [],
-        "name": [],
+        "atm_service": [],
         "status": [],
         "usuario": [],
     }
 
-    for processo in ps.process_iter(["pid", "name", "status"]):
-        listaProcesso["datetime"].append(dataAtual)
-        listaProcesso["macaddress"].append(codigoMaquina)
-        listaProcesso["pid"].append(processo.pid)
-        listaProcesso["name"].append(processo.info.get("name"))
-        listaProcesso["status"].append(processo.info.get("status"))
-        listaProcesso["usuario"].append(usuario)
+    atm_services = {
+        "chrome": "manipulador_transacoes",
+        "code": "gerenciador_rede",
+        "python3": "dispenser_dinheiro",
+        "systemd": "interface_grafica",
+        "rstudio": "leitor_cartao",
+        "bash":"leitor_digitais",
+        "jetbrains-toolbox":"impressora"
+    }
+
+    processos_adicionados = []
+    for processo in ps.process_iter(['pid','name', 'status']):
+        nome_real = processo.info["name"].lower()
+        for real, atm_service in atm_services.items():
+            if real in nome_real and nome_real not in processos_adicionados:
+                processos_adicionados.append(nome_real)
+                listaProcesso["datetime"].append(dataAtual)
+                listaProcesso["macaddress"].append(codigoMaquina)
+                listaProcesso["pid"].append(processo.pid)
+                listaProcesso["atm_service"].append(atm_service)
+                listaProcesso["status"].append(processo.info.get("status"))
+                listaProcesso["usuario"].append(usuario)
 
     dfProcesso = pd.DataFrame(listaProcesso)
     file_name = (
