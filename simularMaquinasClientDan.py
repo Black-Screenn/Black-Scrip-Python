@@ -4,9 +4,11 @@ import os
 from datetime import datetime, timedelta
 import random
 
-OUTPUT_DIR = 'simularMaquinas'
+# ================= CONFIGURAÇÕES GERAIS =================
+OUTPUT_DIR = 'simularMaquinasClientDan'
 EMPRESA_ID = 1
 
+# Datas
 DATA_INICIO = datetime(2025, 1, 1, 0, 0)
 DATA_FIM    = datetime(2025, 12, 3, 23, 50) 
 INTERVALO_MINUTOS = 10
@@ -34,8 +36,8 @@ def get_paydays(year, month):
     
     return paydays
 
-def gerar_dados_computador():
-    print(f"Iniciando simulação de {DATA_INICIO} até {DATA_FIM}...")
+def gerar_dados_computador_unificado():
+    print(f"Iniciando simulação UNIFICADA de {DATA_INICIO} até {DATA_FIM}...")
     
     payday_cache = {}
 
@@ -106,7 +108,7 @@ def gerar_dados_computador():
                 df['pacotes_perdidos'] += np.random.randint(20, 50, num_registros)
 
             df['cpu'] *= fator_cpu
-            df['ram'] *= fator_cpu # RAM acompanha CPU
+            df['ram'] *= fator_cpu 
             df['bytes_enviados'] *= fator_rede
             df['bytes_recebidos'] *= fator_rede
 
@@ -121,6 +123,9 @@ def gerar_dados_computador():
             
         df_dia_final = pd.concat(todos_dados_dia, ignore_index=True)
         
+        # Ordena por Data e depois por MAC para o CSV ficar organizado
+        df_dia_final = df_dia_final.sort_values(by=['datetime', 'macaddress'])
+        
         str_ano = str(ano)
         str_mes = f"{mes:02d}"
         str_dia = f"{dia_num:02d}"
@@ -131,21 +136,18 @@ def gerar_dados_computador():
             f"ano={str_ano}",
             f"mes={str_mes}",
             f"dia={str_dia}",
-            "tipo=maquina"
+            "tipo=computador" 
         )
         
         os.makedirs(pasta_base, exist_ok=True)
         
-        for mac, grupo_mac in df_dia_final.groupby('macaddress'):
-            nome_arquivo = f"{mac}.csv"
-            caminho_arquivo = os.path.join(pasta_base, nome_arquivo)
-            
-            grupo_salvar = grupo_mac.drop(columns=['macaddress'])
-            grupo_salvar['datetime'] = grupo_salvar['datetime'].dt.strftime('%Y-%m-%d %H:%M:%S')
-            
-            grupo_salvar.to_csv(caminho_arquivo, sep=';', index=False)
+        df_dia_final['datetime'] = df_dia_final['datetime'].dt.strftime('%Y-%m-%d %H:%M:%S')
+
+        caminho_arquivo = os.path.join(pasta_base, "dados.csv")
+        
+        df_dia_final.to_csv(caminho_arquivo, sep=';', index=False)
 
     print(f"Simulação concluída! Dados salvos em '{OUTPUT_DIR}'")
 
 if __name__ == "__main__":
-    gerar_dados_computador()
+    gerar_dados_computador_unificado()
