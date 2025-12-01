@@ -17,7 +17,9 @@ servicos_config = {
     'impressora': 1,
     'dispenser_dinheiro': 1,
     'gerenciador_rede': 1,
-    'manipulador_transacoes': 2
+    'manipulador_transacoes': 2,
+    'leitor_digitais': 1,
+    'leitor_cartoes': 1
 }
 
 def gerar_estado_inicial(mac_addrs, config):
