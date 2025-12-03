@@ -31,7 +31,7 @@ def gerar_estado_inicial(mac_addrs, config):
             qtd_real = qtd_base + random.randint(0, 1)
             
             random_value = random.randint(1, 10) 
-            status = "running" if random_value > 3 else "sleeping"
+            status = "running" if random_value < 9 else "sleeping"
 
             for _ in range(qtd_real):
                 processos.append({
